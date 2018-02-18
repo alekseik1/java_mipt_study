@@ -26,6 +26,23 @@ public class Hello {
         }
     }
 
+    private static int Fib_Cycle(int n) {
+        if (n < 1) {
+            return -1;
+        }
+        if(n == 1 || n == 2) {
+            return 1;
+        }
+        int res = 1;
+        int res1 = 1;
+        for(int i = 2; i < n; i++) {
+            int tmp = res;
+            res += res1;
+            res1 = tmp;
+        }
+        return res;
+    }
+
     private static void hello_for() {
         for(int i=0; i < 5; i++) {
             System.out.println("Hello, world!");
