@@ -12,7 +12,7 @@ public class CircularBuffer<T> {
     volatile private int _capacity = 0;
     volatile private int _left_size = 0;
 
-    CircularBuffer(int capacity) {
+    public CircularBuffer(int capacity) {
         _data = new Object[capacity];
         _capacity = capacity;
         _left_size = _capacity;
