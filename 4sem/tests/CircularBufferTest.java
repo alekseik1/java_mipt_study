@@ -6,7 +6,7 @@ import week6.CircularBuffer;
 public class CircularBufferTest extends TestCase {
 
     private CircularBuffer<Integer> buffer;
-    private int cap = 5;
+    private int cap = 10;
 
     protected void setUp() {
          buffer = new CircularBuffer<>(cap);
@@ -19,6 +19,15 @@ public class CircularBufferTest extends TestCase {
             } else {
                 assertEquals(buffer.push(i), false);
             }
+        }
+    }
+
+    public void testPop() {
+        for(int i = 0; i < cap; i++) {
+            buffer.push(i);
+        }
+        for(int i = 0; i < 2*cap; i++) {
+            assertEquals(buffer.pop().toString(), ((Integer)(i % cap)).toString());
         }
     }
 }
