@@ -7,9 +7,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
+import java.util.concurrent.*;
+import java.util.concurrent.Executors;
 
 public class SimpleGUI extends JFrame {
     private Color color;
+    private float t = 0;
 
     public SimpleGUI() {
         setSize(450, 450);
@@ -27,6 +30,12 @@ public class SimpleGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 color = Color.BLUE;
                 SimpleGUI.this.repaint();
+                ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+                Runnable task = () -> {
+                    t+= 1;
+                    SimpleGUI.this.repaint();
+                };
+                executor.scheduleAtFixedRate(task, 0, 1000/25, TimeUnit.MILLISECONDS);
             }
         });
         button.addMouseListener(new MouseListener() {
@@ -62,7 +71,7 @@ public class SimpleGUI extends JFrame {
         super.paint(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(color);
-        Line2D lin = new Line2D.Float(100, 100, 250, 260);
+        Line2D lin = new Line2D.Float((float) (100*(2+Math.cos(t/50))), (float) (100*(Math.sin(t/50)+2)), 250, 250);
         g2.draw(lin);
     }
 
