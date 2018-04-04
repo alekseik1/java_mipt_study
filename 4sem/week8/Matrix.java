@@ -71,13 +71,37 @@ public class Matrix {
         return res;
     }
 
+    protected double scalarMult(Vector<Double> v1, Vector<Double> v2) {
+        if(v1.size() != v2.size())
+            throw new IndexOutOfBoundsException("v1 and v2 doen't fits!");
+        double res = 0;
+        for(int i = 0; i < v1.size(); i++) {
+            res += v1.get(i)*v2.get(i);
+        }
+        return res;
+    }
+
+    public Matrix multBy(Matrix other) {
+        if(c != other.r)
+            throw new IndexOutOfBoundsException("Matrices doesn't fit!!!");
+        Matrix res = new Matrix(r, other.c);
+        // TODO: Распараллель меня!
+        for(int i = 0; i < res.getRows(); i++) {
+            for(int j = 0; j < res.getColumns(); j++) {
+                res.setAt(i, j, scalarMult(this.getRow(i), other.getCol(j)));
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         Matrix m = new Matrix(2, 2);
         m.setAt(0, 0, 1);
         m.setAt(0, 1, 2);
         m.setAt(1, 0, 3);
         m.setAt(1, 1, 4);
-        m = m.T();
+        Matrix m1 = m.T();
+        Matrix m2 = m.multBy(m);
         System.out.println("HELLO");
     }
 
