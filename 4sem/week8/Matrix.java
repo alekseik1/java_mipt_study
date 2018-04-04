@@ -1,12 +1,14 @@
 package week8;
 
-import java.util.ArrayList;
 import java.util.Vector;
+import java.util.concurrent.*;
 
+// TODO: Люди добрые, сделайте это через связные списки. Мне больно смотреть на этот код
 public class Matrix {
 
-    private int r, c;
-    private Vector<Vector<Double>> rows = new Vector<>();
+    protected int r, c;
+    // А-а-а, какой ты классный. Хранить массив как лист из рядов. А если я захочу считать колонку?
+    protected Vector<Vector<Double>> rows = new Vector<>();
 
     Matrix(int rows, int columns) {
         r = rows;
@@ -41,6 +43,7 @@ public class Matrix {
 
     public Vector<Double> getCol(int col) {
         Vector<Double> res = new Vector<>();
+        // Я так и думал. Ты итерируешься по всем рядам. Это что, новый вид насилия над моим процессором?
         for(int i = 0; i < this.r; i++) {
             res.add(rows.get(i).get(col));
         }
@@ -81,27 +84,69 @@ public class Matrix {
         return res;
     }
 
-    public Matrix multBy(Matrix other) {
+    protected class OneShot implements Callable<Double> {
+
+        Vector<Double> row = new Vector<>();
+        Vector<Double> column = new Vector<>();
+
+        OneShot(Vector<Double> row, Vector<Double> column) {
+            this.row = row;
+            this.column = column;
+        }
+
+        public Double call() {
+            return scalarMult(row, column);
+        }
+    }
+
+    public Matrix multBy(Matrix other) throws ExecutionException, InterruptedException {
         if(c != other.r)
             throw new IndexOutOfBoundsException("Matrices doesn't fit!!!");
         Matrix res = new Matrix(r, other.c);
-        // TODO: Распараллель меня!
+        ExecutorService executor = Executors.newCachedThreadPool();
+        Runnable count_one_row = () -> {
+
+        };
+        Future<Double>[][] results = new Future[r][other.c];
         for(int i = 0; i < res.getRows(); i++) {
             for(int j = 0; j < res.getColumns(); j++) {
-                res.setAt(i, j, scalarMult(this.getRow(i), other.getCol(j)));
+                // Ой-ой-ой. Да у нас тут getCol(), который работает дольше всего!
+                // Кажется, кому-то пора уже научиться нормально прогать
+                results[i][j] = executor.submit(new OneShot(getRow(i), other.getCol(j)));
             }
         }
+        for(int i = 0; i < res.getRows(); i++) {
+            for(int j = 0; j < res.getColumns(); j++) {
+                // Хороший способ брать результаты. Нет, правда. Матрица Future[][] -- это сильно!
+                res.setAt(i, j, results[i][j].get());
+            }
+        }
+        // Убьем потоки. Почему-то они сами не хотят этого делать
+        executor.shutdownNow();
         return res;
     }
 
-    public static void main(String[] args) {
-        Matrix m = new Matrix(2, 2);
-        m.setAt(0, 0, 1);
-        m.setAt(0, 1, 2);
-        m.setAt(1, 0, 3);
-        m.setAt(1, 1, 4);
+    public void print() {
+        for(Vector<Double> row : rows) {
+            for(double d : row) {
+                System.out.print(d);
+                System.out.print(' ');
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        int size = 100;
+        Matrix m = new Matrix(size, size);
+        for(int i = 0; i < size; i++) {
+            for(int j = 0; j < size; j++) {
+                m.setAt(i, j, i*i+2*j*j);
+            }
+        }
         Matrix m1 = m.T();
         Matrix m2 = m.multBy(m);
+        m2.print();
         System.out.println("HELLO");
     }
 
