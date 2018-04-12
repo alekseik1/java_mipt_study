@@ -12,15 +12,14 @@ public class GameGUI {
 
     private final String NAME_OF_GAME = "Conway's Game of Life";
     private final int START_LOCATION = 100;
-    private final int LIFE_SIZE = 250;
-    private final int LIFE_SIZE_WIDTH = 250;
-    private final int LIFE_SIZE_HEIGHT = 250;
-    private int showDelay = 5;
+    private int LIFE_SIZE_WIDTH = 500;
+    private int LIFE_SIZE_HEIGHT = 250;
+    private int showDelay = 200;
 
     private final int POINT_RADIUS = 3;
     private final int BTN_PANEL_HEIGHT = 48;
-    private boolean[][] lifeGeneration = new boolean[LIFE_SIZE][LIFE_SIZE];
-    private boolean[][] nextGeneration = new boolean[LIFE_SIZE][LIFE_SIZE];
+    private boolean[][] lifeGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
+    private boolean[][] nextGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
     private volatile boolean startGUINextGeneration = false; // fixed the problem in 64-bit JVM
     private Canvas canvasPanel;
     private Random random = new Random();
@@ -30,10 +29,11 @@ public class GameGUI {
     }
 
     private void startGUI() {
-        JFrame frame = new JFrame(NAME_OF_GAME);
+        final JFrame frame = new JFrame(NAME_OF_GAME);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        int FIELD_SIZE = LIFE_SIZE * POINT_RADIUS + 7;
-        frame.setSize(FIELD_SIZE, FIELD_SIZE + BTN_PANEL_HEIGHT);
+        int FIELD_SIZE_WIDTH = LIFE_SIZE_WIDTH * POINT_RADIUS + 7;
+        int FIELD_SIZE_HEIGHT = LIFE_SIZE_HEIGHT * POINT_RADIUS + 7;
+        frame.setSize(FIELD_SIZE_WIDTH, FIELD_SIZE_HEIGHT + BTN_PANEL_HEIGHT);
         frame.setLocation(START_LOCATION, START_LOCATION);
         frame.setResizable(true);
 
@@ -73,13 +73,28 @@ public class GameGUI {
             }
         };
         service.scheduleAtFixedRate(run_gui, 0, showDelay, TimeUnit.MILLISECONDS);
+
+        frame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                System.out.println("REPAINTER");
+                startGUINextGeneration = !startGUINextGeneration;
+                LIFE_SIZE_WIDTH = frame.getWidth();
+                LIFE_SIZE_HEIGHT = frame.getHeight();
+                lifeGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
+                nextGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
+                canvasPanel.repaint();
+                startGUINextGeneration = !startGUINextGeneration;
+            }
+        });
     }
 
     // randomly fill cells
     public class FillButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent ev) {
-            for (int x = 0; x < LIFE_SIZE; x++) {
-                for (int y = 0; y < LIFE_SIZE; y++) {
+            for (int x = 0; x < LIFE_SIZE_WIDTH; x++) {
+                for (int y = 0; y < LIFE_SIZE_HEIGHT; y++) {
                     lifeGeneration[x][y] = random.nextBoolean();
                 }
             }
@@ -94,10 +109,10 @@ public class GameGUI {
             for (int dy = -1; dy < 2; dy++) {
                 int nX = x + dx;
                 int nY = y + dy;
-                nX = (nX < 0) ? LIFE_SIZE - 1 : nX;
-                nY = (nY < 0) ? LIFE_SIZE - 1 : nY;
-                nX = (nX > LIFE_SIZE - 1) ? 0 : nX;
-                nY = (nY > LIFE_SIZE - 1) ? 0 : nY;
+                nX = (nX < 0) ? LIFE_SIZE_WIDTH - 1 : nX;
+                nY = (nY < 0) ? LIFE_SIZE_HEIGHT - 1 : nY;
+                nX = (nX > LIFE_SIZE_WIDTH - 1) ? 0 : nX;
+                nY = (nY > LIFE_SIZE_HEIGHT - 1) ? 0 : nY;
                 count += (lifeGeneration[nX][nY]) ? 1 : 0;
             }
         }
@@ -107,8 +122,8 @@ public class GameGUI {
 
     // the main process of life
     private void processOfLife() {
-        for (int x = 0; x < LIFE_SIZE; x++) {
-            for (int y = 0; y < LIFE_SIZE; y++) {
+        for (int x = 0; x < LIFE_SIZE_WIDTH; x++) {
+            for (int y = 0; y < LIFE_SIZE_HEIGHT; y++) {
                 int count = countNeighbors(x, y);
                 nextGeneration[x][y] = lifeGeneration[x][y];
                 // if are 3 live neighbors around empty cells - the cell becomes alive
@@ -117,8 +132,8 @@ public class GameGUI {
                 nextGeneration[x][y] = ((count >= 2) && (count <= 3)) && nextGeneration[x][y];
             }
         }
-        for (int x = 0; x < LIFE_SIZE; x++) {
-            System.arraycopy(nextGeneration[x], 0, lifeGeneration[x], 0, LIFE_SIZE);
+        for (int x = 0; x < LIFE_SIZE_WIDTH; x++) {
+            System.arraycopy(nextGeneration[x], 0, lifeGeneration[x], 0, LIFE_SIZE_HEIGHT);
         }
     }
 
@@ -127,8 +142,8 @@ public class GameGUI {
         @Override
         public void paint(Graphics g) {
             super.paint(g);
-            for (int x = 0; x < LIFE_SIZE; x++) {
-                for (int y = 0; y < LIFE_SIZE; y++) {
+            for (int x = 0; x < LIFE_SIZE_WIDTH; x++) {
+                for (int y = 0; y < LIFE_SIZE_HEIGHT; y++) {
                     if (lifeGeneration[x][y]) {
                         g.fillOval(x*POINT_RADIUS, y*POINT_RADIUS, POINT_RADIUS, POINT_RADIUS);
                     }
