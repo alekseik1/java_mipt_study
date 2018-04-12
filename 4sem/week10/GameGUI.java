@@ -14,7 +14,7 @@ public class GameGUI {
     private final int START_LOCATION = 100;
     private int LIFE_SIZE_WIDTH = 500;
     private int LIFE_SIZE_HEIGHT = 250;
-    private int showDelay = 200;
+    private int showDelay = 500;
 
     private final int POINT_RADIUS = 3;
     private final int BTN_PANEL_HEIGHT = 48;
@@ -78,14 +78,19 @@ public class GameGUI {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                System.out.println("REPAINTER");
-                startGUINextGeneration = !startGUINextGeneration;
                 LIFE_SIZE_WIDTH = frame.getWidth();
                 LIFE_SIZE_HEIGHT = frame.getHeight();
                 lifeGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
                 nextGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
+                boolean tmp = !startGUINextGeneration;
+                startGUINextGeneration = tmp;
+                for (int x = 0; x < LIFE_SIZE_WIDTH; x++) {
+                    for (int y = 0; y < LIFE_SIZE_HEIGHT; y++) {
+                        lifeGeneration[x][y] = random.nextBoolean();
+                    }
+                }
                 canvasPanel.repaint();
-                startGUINextGeneration = !startGUINextGeneration;
+                startGUINextGeneration = !tmp;
             }
         });
     }
