@@ -12,11 +12,11 @@ public class GameGUI {
 
     private final String NAME_OF_GAME = "Conway's Game of Life";
     private final int START_LOCATION = 100;
-    private int LIFE_SIZE_WIDTH = 500;
-    private int LIFE_SIZE_HEIGHT = 250;
-    private int showDelay = 500;
+    private int LIFE_SIZE_WIDTH = 100;
+    private int LIFE_SIZE_HEIGHT = 50;
+    private int showDelay = 100;
 
-    private final int POINT_RADIUS = 3;
+    private final int POINT_RADIUS = 5;
     private final int BTN_PANEL_HEIGHT = 48;
     private boolean[][] lifeGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
     private boolean[][] nextGeneration = new boolean[LIFE_SIZE_WIDTH][LIFE_SIZE_HEIGHT];
@@ -34,11 +34,43 @@ public class GameGUI {
         int FIELD_SIZE_WIDTH = LIFE_SIZE_WIDTH * POINT_RADIUS + 7;
         int FIELD_SIZE_HEIGHT = LIFE_SIZE_HEIGHT * POINT_RADIUS + 7;
         frame.setSize(FIELD_SIZE_WIDTH, FIELD_SIZE_HEIGHT + BTN_PANEL_HEIGHT);
-        frame.setLocation(START_LOCATION, START_LOCATION);
+        frame.setLocation(0, 0);
         frame.setResizable(true);
 
         canvasPanel = new Canvas();
         canvasPanel.setBackground(Color.white);
+        canvasPanel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int MAGIC_CONST = 2;
+                for(int i = -MAGIC_CONST; i < MAGIC_CONST; i++) {
+                    for(int j = -MAGIC_CONST; j < MAGIC_CONST; j++) {
+                        lifeGeneration[e.getX()/POINT_RADIUS + i][e.getY()/POINT_RADIUS + j] = true;
+                    }
+                }
+                canvasPanel.repaint();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
 
         JButton fillButton = new JButton("Fill");
         fillButton.addActionListener(new FillButtonListener());
@@ -103,6 +135,7 @@ public class GameGUI {
                     lifeGeneration[x][y] = random.nextBoolean();
                 }
             }
+            lifeGeneration[50][50] = true;
             canvasPanel.repaint();
         }
     }
