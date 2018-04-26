@@ -2,9 +2,6 @@ package week10;
 
 import java.io.Serializable;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class GameLogic implements Serializable {
     static final long serialVersionUID = 1L;
@@ -50,6 +47,7 @@ public class GameLogic implements Serializable {
 
     // the main process of life
     public void processOfLife() {
+        int threads = Runtime.getRuntime().availableProcessors();
         for (int x = 0; x < LIFE_SIZE_WIDTH; x++) {
             for (int y = 0; y < LIFE_SIZE_HEIGHT; y++) {
                 int count = countNeighbors(x, y);
