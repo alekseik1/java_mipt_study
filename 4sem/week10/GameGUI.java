@@ -1,14 +1,12 @@
 package week10;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,7 +19,7 @@ public class GameGUI {
     private int LIFE_SIZE_WIDTH = 100;
     private int LIFE_SIZE_HEIGHT = 50;
     private int showDelay = 100;
-    private String BACKUP_FILENAME = "game-backup.json";
+    private String BACKUP_FILENAME = "game-backup.back";
     private String BACKUP_DIRECTORY = "backups";
 
     private final int POINT_RADIUS = 5;
@@ -43,7 +41,7 @@ public class GameGUI {
         int FIELD_SIZE_HEIGHT = LIFE_SIZE_HEIGHT * POINT_RADIUS + 7;
         frame.setSize(FIELD_SIZE_WIDTH, FIELD_SIZE_HEIGHT + BTN_PANEL_HEIGHT);
         frame.setLocation(0, 0);
-        frame.setResizable(true);
+        frame.setResizable(false);
 
         canvasPanel = new Canvas();
         canvasPanel.setBackground(Color.white);
@@ -94,6 +92,17 @@ public class GameGUI {
             dumpToFile(BACKUP_FILENAME);
         });
 
+        JButton loadButton = new JButton("Load");
+        loadButton.addActionListener((ActionEvent e) -> {
+            try {
+                readFromFile(BACKUP_FILENAME);
+                canvasPanel.repaint();
+            } catch(IOException exc) {
+                exc.printStackTrace();
+                System.exit(-1);
+            }
+        });
+
         final JButton startGUIButton = new JButton("Play");
         startGUIButton.addActionListener(e -> {
             startGUINextGeneration = !startGUINextGeneration;
@@ -105,6 +114,7 @@ public class GameGUI {
         btnPanel.add(stepButton);
         btnPanel.add(startGUIButton);
         btnPanel.add(saveButton);
+        btnPanel.add(loadButton);
 
         frame.getContentPane().add(BorderLayout.CENTER, canvasPanel);
         frame.getContentPane().add(BorderLayout.SOUTH, btnPanel);
@@ -228,11 +238,43 @@ public class GameGUI {
         String dump_string = gson.toJson(lifeGeneration);
         try {
             FileOutputStream out = new FileOutputStream(BACKUP_DIRECTORY + File.separator + BACKUP_FILENAME);
-            out.write(dump_string.getBytes());
-            out.close();
+            for(boolean[] row : lifeGeneration) {
+                for(boolean item : row) {
+                    Byte true_byte = 1;
+                    Byte false_byte = 0;
+                    Byte b = item == true? true_byte : false_byte;
+                    out.write(b);
+                }
+            }
         } catch(FileNotFoundException e) {
             e.printStackTrace();
         } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Читает массив из файла. Может бросать {@link IOException}
+     * @param path Путь до файла
+     * @throws IOException
+     */
+    public void readFromFile(String path) throws IOException {
+        try {
+            FileInputStream in = new FileInputStream(BACKUP_DIRECTORY + File.separator + path);
+            StringBuilder contentBuilder = new StringBuilder();
+            int c;
+            ArrayList<Boolean> data = new ArrayList<>();
+            while((c = in.read()) != -1) {
+                Byte true_byte = 1;
+                Byte false_byte = 0;
+                data.add(c == 1);
+            }
+            for(int i = 0; i < lifeGeneration.length; i++) {
+                for(int j = 0; j < lifeGeneration[i].length; j++) {
+                    lifeGeneration[i][j] = data.get(lifeGeneration[0].length*i + j);
+                }
+            }
+        } catch(FileNotFoundException e) {
             e.printStackTrace();
         }
     }
