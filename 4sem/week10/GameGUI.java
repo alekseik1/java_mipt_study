@@ -1,8 +1,14 @@
 package week10;
 
+import com.google.gson.Gson;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,6 +21,8 @@ public class GameGUI {
     private int LIFE_SIZE_WIDTH = 100;
     private int LIFE_SIZE_HEIGHT = 50;
     private int showDelay = 100;
+    private String BACKUP_FILENAME = "game-backup.json";
+    private String BACKUP_DIRECTORY = "backups";
 
     private final int POINT_RADIUS = 5;
     private final int BTN_PANEL_HEIGHT = 48;
@@ -81,6 +89,11 @@ public class GameGUI {
             canvasPanel.repaint();
         });
 
+        JButton saveButton = new JButton("Save");
+        saveButton.addActionListener((ActionEvent e) -> {
+            dumpToFile(BACKUP_FILENAME);
+        });
+
         final JButton startGUIButton = new JButton("Play");
         startGUIButton.addActionListener(e -> {
             startGUINextGeneration = !startGUINextGeneration;
@@ -91,6 +104,7 @@ public class GameGUI {
         btnPanel.add(fillButton);
         btnPanel.add(stepButton);
         btnPanel.add(startGUIButton);
+        btnPanel.add(saveButton);
 
         frame.getContentPane().add(BorderLayout.CENTER, canvasPanel);
         frame.getContentPane().add(BorderLayout.SOUTH, btnPanel);
@@ -187,6 +201,39 @@ public class GameGUI {
                     }
                 }
             }
+        }
+    }
+
+    private boolean createDumpFolder(String path) {
+        File file = new File(path);
+        try {
+            return file.mkdirs();
+        } catch(SecurityException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void dumpToFile(String filename) {
+        // Check if backup folder is available
+        File file = new File(BACKUP_DIRECTORY);
+        try {
+            if(!(file.isDirectory() && file.canWrite())) {
+                createDumpFolder(BACKUP_DIRECTORY);
+            }
+        } catch(SecurityException e) {
+            e.printStackTrace();
+        }
+        Gson gson = new Gson();
+        String dump_string = gson.toJson(lifeGeneration);
+        try {
+            FileOutputStream out = new FileOutputStream(BACKUP_DIRECTORY + File.separator + BACKUP_FILENAME);
+            out.write(dump_string.getBytes());
+            out.close();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        } catch(IOException e) {
+            e.printStackTrace();
         }
     }
 }
