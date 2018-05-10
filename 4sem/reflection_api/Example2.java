@@ -52,5 +52,21 @@ public class Example2 {
         } catch(IllegalAccessException e) {
             e.printStackTrace();
         }
+
+        try {
+            Method getXMethod = clazz.getDeclaredMethod("getX");
+            Object res = getXMethod.invoke(obj);
+            System.out.println(res);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Constructor constr = clazz.getConstructor(String.class);
+            constr.setAccessible(true);
+            Victim v = (Victim) constr.newInstance("99");
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 }
