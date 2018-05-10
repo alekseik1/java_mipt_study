@@ -41,5 +41,16 @@ public class Example2 {
         for(Constructor f: constructors) {
             System.out.println(f);
         }
+        System.out.println("------------------------------------");
+        try {
+            Field xField = clazz.getDeclaredField("x");
+            xField.setAccessible(true);
+            xField.setInt(obj, 100);
+            System.out.println(((Victim) obj).getX());
+        } catch(NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch(IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 }
