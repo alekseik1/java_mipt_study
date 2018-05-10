@@ -52,7 +52,7 @@ public class Example2 {
         } catch(IllegalAccessException e) {
             e.printStackTrace();
         }
-
+        // Method
         try {
             Method getXMethod = clazz.getDeclaredMethod("getX");
             Object res = getXMethod.invoke(obj);
@@ -60,7 +60,7 @@ public class Example2 {
         } catch(Exception e) {
             e.printStackTrace();
         }
-
+        // Constructor
         try {
             Constructor constr = clazz.getConstructor(String.class);
             constr.setAccessible(true);
@@ -68,5 +68,12 @@ public class Example2 {
         } catch(Exception e) {
             e.printStackTrace();
         }
+
+        // Classloader
+        ClassLoader cl = clazz.getClassLoader();
+        clazz.getName();
+        try {
+            Class other = cl.loadClass("reflection_api.BasicExample");
+        } catch(Exception e){ e.printStackTrace(); }
     }
 }
